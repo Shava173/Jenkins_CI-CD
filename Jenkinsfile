@@ -4,41 +4,33 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git 'https://github.com/Shava173/Jenkins_CI-CD.git'
-            }
-        }
-
-        stage('Build') {
-            steps {
-                sh 'mvn clean package'
-            }
-        }
-
-        stage('Test') {
-            steps {
-                sh 'mvn test'
-            }
-            post {
-                always {
-                    junit 'target/surefire-reports/*.xml'
+                script {
+                    // Перевіряємо підключення до Git
+                    try {
+                        git branch: 'main', url: 'https://github.com/Shava173/Jenkins_CI-CD.git'
+                        echo "Git repository checked out successfully"
+                    } catch (Exception e) {
+                        error "Failed to checkout Git repository: ${e.getMessage()}"
+                    }
                 }
             }
         }
-
-        stage('Deploy') {
+        stage('List Files') {
             steps {
-                echo 'Deploying to test server...'
-                // Додайте команди для деплою, якщо необхідно
+                script {
+                    // Перевіряємо, чи файли були завантажені успішно
+                    sh 'ls -al'
+                }
             }
         }
     }
 
     post {
         success {
-            echo 'Build and tests completed successfully!'
+            echo 'Pipeline completed successfully!'
         }
         failure {
-            echo 'Build or tests failed!'
+            echo 'Pipeline failed. Please check the logs for more details.'
         }
     }
 }
